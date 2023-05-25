@@ -1,18 +1,54 @@
 <template>
   <q-page class="q-pa-md">
 
-    <q-btn color="orange" text-color="black" label="Добавить сообщение" class="q-ma-md" @click="isVisibl = !isVisibl"/>
+    <q-btn
+	    color="orange"
+	    text-color="black"
+	    label="Добавить сообщение"
+	    class="q-my-md"
+	    @click="isVisibl = !isVisibl"
+    />
 
     <q-table
-      title="Сообщения"
+      title="Шаблоны сообщений"
       :data="data"
       :columns="columns"
       row-key="name"
+      no-data-label="Шаблоны сообщений не найдены"
       :hide-bottom="data.length > 0"
       :rows-per-page-options="[0]"
-    />  
+    >
+	    <template v-slot:body-cell-number="props">
+		    <q-td :props="props">
+			    {{ props.rowIndex + 1 }}
+		    </q-td>
+	    </template>
+	    
+	    <template v-slot:body-cell-isSms="props">
+		    <q-td :props="props">
+			    <q-icon
+				    :name="props.value ? 'fas fa-circle-check' : 'fas fa-circle-minus'"
+				    :color="props.value ? 'positive' : 'negative'"
+				    size="sm"
+			    />
+		    </q-td>
+	    </template>
+	    
+	    <template v-slot:body-cell-isEmail="props">
+		    <q-td :props="props">
+			    <q-icon
+				    :name="props.value ? 'fas fa-circle-check' : 'fas fa-circle-minus'"
+				    :color="props.value ? 'positive' : 'negative'"
+				    size="sm"
+			    />
+		    </q-td>
+	    </template>
+    </q-table>
 
-    <q-dialog v-model="isVisibl" @before-hide="closeMessageDialog">
+    <q-dialog
+	    v-model="isVisibl"
+	    @before-hide="closeMessageDialog"
+    >
       <q-card style="width: 500px; max-width: 90vw;" class="bg-white">
         <q-card-section class="row items-center">
           <div class="col text-h5">Добавление сообщения</div> 
@@ -23,32 +59,62 @@
               icon="close"
               color="dark"
               flat
+              dense
+              round
             />
           </div>
-          
         </q-card-section>
 
         <q-separator />
 
         <q-card-section>
-          <q-input v-model="message.subject" placeholder="Тема"/>
-          <q-input v-model="message.body" placeholder="Сообщение"/>
-          <div style="display: flex" class="q-ma-md">
-            <q-select
-            filled
-            v-model="message.sensors"
-            multiple
-            :options="options"
-            label="Датчики"
-            style="width: 250px"
-            /> 
-            <q-btn color="orange" text-color="black" label="Добавить" class="q-ml-md" @click="addMessage"/>
-          </div>
+          <q-input
+	          v-model="message.messageTitle"
+	          label="Тема сообщения"
+	          class="q-mb-md"
+          />
+	        
+          <q-input
+	          v-model="message.messageText"
+	          label="Сообщение"
+	          autogrow
+	          class="q-mb-md"
+          />
+	        
+	       <q-select
+		       v-model="message.sensorId"
+		       multiple
+		       :options="options"
+		       label="Датчики"
+		       class="q-mb-md"
+	       />
+	        
+	        <div class="row items-center q-col-gutter-md q-mb-md">
+		        <div>
+			        <q-checkbox
+				        v-model="message.isSms"
+				        label="Отправить Sms"
+			        />
+		        </div>
+		        
+		        <div>
+			        <q-checkbox
+				        v-model="message.isEmail"
+				        label="Отправить на Email"
+			        />
+		        </div>
+	        </div>
+	        
+	        <q-btn
+		        color="orange"
+		        text-color="black"
+		        label="Добавить"
+		        class="full-width"
+		        @click="addMessage"
+	        />
         </q-card-section>
       </q-card>
     </q-dialog>
-
-
   </q-page>
 </template>
 
@@ -59,9 +125,11 @@ export default {
   data() {
     return {
       message: {
-        subject: null,
-        body: null,
-        sensors: null,
+        messageTitle: null,
+        messageText:  null,
+        sensorId:      null,
+        isSms:        false,
+        isEmail:      false,
       },
       options: [
         '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'
@@ -71,76 +139,106 @@ export default {
           {
             name: 'number',
             label: 'Номер',
-            align: 'left',
+            align: 'center',
             field: 'number',
-            style: 'width: 1%',
+            style: 'font-size: 1rem; font-weight: 700px;',
+            headerStyle: 'font-size: 1rem; font-weight: 700px;',
           },
           {
-            name: 'subject',
-            required: true,
+            name: 'messageTitle',
             label: 'Тема',
-            align: 'left',
-            field: 'subject',
-            style: 'width: 30%',
+            align: 'center',
+            field: 'messageTitle',
+            style: 'font-size: 1rem; font-weight: 700px;',
+	        headerStyle: 'font-size: 1rem; font-weight: 700px;'
           },
           {
-            name: 'body',
-            required: true,
-            label: 'Содержимое',
-            align: 'left',
-            field: 'body',
-            style: 'width: 40%',
+            name: 'messageText',
+            label: 'Сообщение',
+            align: 'center',
+            field: 'messageText',
+            style: 'font-size: 1rem; font-weight: 700px;',
+	        headerStyle: 'font-size: 1rem; font-weight: 700px;'
           },
           {
-            name: 'sensors',
-            required: true,
+            name: 'sensorId',
             label: 'Датчики',
-            align: 'left',
-            field: 'sensors',
-          }
+            align: 'center',
+            field: 'sensorId',
+            style: 'font-size: 1rem; font-weight: 700px;',
+	        headerStyle: 'font-size: 1rem; font-weight: 700px;',
+            format: value => value ? this.generateSensorsList(value) : '',
+          },
+	      {
+		      name: 'isSms',
+		      label: 'Отправка SMS',
+		      align: 'center',
+		      field: 'isSms',
+		      style: 'font-size: 1rem; font-weight: 700px;',
+		      headerStyle: 'font-size: 1rem; font-weight: 700px;'
+	      },
+	      {
+		      name: 'isEmail',
+		      label: 'Отправка Email',
+		      align: 'center',
+		      field: 'isEmail',
+		      style: 'font-size: 1rem; font-weight: 700px;',
+		      headerStyle: 'font-size: 1rem; font-weight: 700px;'
+	      },
       ],
-      data: [
-        {
-          number: 1,
-          subject: "wdf", 
-          body: "шапгыр",
-          sensors: "sensors"
-        },
-        {
-          number: 2,
-          subject: "wdf", 
-          body: "шапгыр",
-          sensors: "sensors"
-        },
-        {
-          number: 3,
-          subject: "wdf", 
-          body: "шапгыр",
-          sensors: "sensors"
-        },
-        {
-          number: 4,
-          subject: "wdf", 
-          body: "шапгыр",
-          sensors: "sensors"
-        },
-      ]
+      data: [],
     }
   },
   methods: {
     closeMessageDialog() {
-      this.message.subject = null
-      this.message.body = null
-      this.message.sensors = null
+      for (const field in this.message) {
+		  this.message[field] = null;
+      }
+	  this.message.isSms = false;
+	  this.message.isEmail = false;
     },
-    addMessage() {
-      this.data.push({
-        number: this.data.length + 1,
-        ...this.message,
-      })
-      this.isVisibl = false
-      this.closeMessageDialog()
+    async addMessage() {
+	  const request = {
+		  ...this.message,
+	  };
+	  try {
+		  const response = await this.$axios.post('/template/add', request);
+		  this.data.push({
+			  ...this.message,
+			  messageId: response.data.message.messageTemplateId,
+		  });
+		  this.isVisibl = false;
+		  this.closeMessageDialog();
+	  }
+	  catch(error) {
+		  console.error('ERROR ADD MESSAGE');
+	  }
+    },
+	generateSensorsList(sensors) {
+		let sensorsList = '';
+		sensors.map((sensor, index) => {
+			if (index !== sensors.length - 1) {
+				sensorsList += `№${sensor}; `;
+			}
+			else {
+				sensorsList += `№${sensor}`;
+			}
+		});
+		
+		return sensorsList;
+	},
+    async getMessages() {
+		try {
+			const response = await this.$axios.post('/template/show');
+			this.data = response.data.message;
+		}
+		catch(error) {
+			console.error('ERROR GET MESSAGES');
+		}
     }
-  }
+  },
+  async created() {
+	  await this.getMessages();
+  },
 }
 </script>
