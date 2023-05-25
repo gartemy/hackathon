@@ -237,9 +237,13 @@ export default {
 	  request.userId = this.message.userId.map((user) => user.userId);
 	  try {
 		  const response = await this.$axios.post('/template/add', request);
-		  this.data.push({
+		  const message = {
 			  ...this.message,
 			  messageId: response.data.message.messageTemplateId,
+		  };
+		  message.userFio = message.userId.map(message => message.userFio);
+		  this.data.push({
+			  ...message,
 		  });
 		  this.isVisibl = false;
 		  this.closeMessageDialog();
