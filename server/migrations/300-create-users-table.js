@@ -16,6 +16,10 @@ exports.up = pgm => {
           type: 'varchar(500)',
           comment: 'Email пользователя'
         },
+        userPhone:{
+          type:'varchar(150)',
+          comment:'Телефон'
+        },
         userRole:{
           type: "integer",
           comment: '1 - админ, 2-пользователь'

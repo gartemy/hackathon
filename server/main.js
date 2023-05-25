@@ -136,7 +136,68 @@ fastify.post('/template/show', async (request, reply) => {
     reply.send(data);
 });
 
+fastify.get('/users/show', async (request, reply) => {
+    let data = {
+        message:    'error',
+        statusCode: 400,
+    };
+    const client = await pool.connect();
+    try {
+        const request = await client.query(`SELECT *
+                                            FROM users`);
+        
+        data.message = request.rows;
+        data.statusCode = 200;
+    }
+    catch (e) {
+        console.log(e);
+    }
+    finally {
+        client.release();
+    }
+    reply.send(data);
+});
 
+fastify.get('/request',async (request, reply)=>{
+    let data = {
+        message:    'error',
+        statusCode: 400,
+    };
+    const client = await pool.connect();
+    try {
+        const request = await client.query(`SELECT *
+                                            FROM requests r
+                                                     INNER JOIN sensors s ON s."sensorId" = r."sensorId"
+                                                     INNER JOIN sensortype st ON s."sensorType" = st."sensorTypeId"
+                                                     INNER JOIN messagetemplates m ON r."sensorId" = ANY (m."sensorId")
+                                                     INNER JOIN users u ON u."userId" = ANY (m."userId")
+                                            WHERE "isGotten" IS FALSE
+                                              AND (r.value < st."minValue" OR r.value > st."maxValue")`);
+        
+        if(request.rows.length === 0){
+            data.message = 'Отправлять нечего'
+            return data
+        }
+        await client.query(`UPDATE requests
+                            SET "isGotten" = TRUE
+                            FROM (SELECT r."requestId"
+                                  FROM requests r
+                                           INNER JOIN sensors s ON s."sensorId" = r."sensorId"
+                                           INNER JOIN sensortype st ON s."sensorType" = st."sensorTypeId"
+                                  WHERE "isGotten" IS FALSE
+                                    AND (r.value < st."minValue" OR r.value > st."maxValue")) AS r
+                            WHERE r."requestId" = requests."requestId"`);
+        data.message = request.rows;
+        data.statusCode = 200;
+    }
+    catch (e) {
+        console.log(e);
+    }
+    finally {
+        client.release();
+    }
+    reply.send(data);
+})
 
 // Создание запроса с использование path параметров
 fastify.get('/:id',function (request, reply) {

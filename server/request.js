@@ -2,8 +2,8 @@ const axios = require('axios')
 function createRequest() {
     let workshopId = Math.random() + 1;
     let lineId = Math.random() + 1
-    let controllerId = (Math.random() + 1) * 18
-    let controllerType = (Math.random() + 1) * 3
+    let controllerId = Math.random() * 3
+    let controllerType = Math.random() * 3
     let value = Math.random() * 300
 
     let data = {

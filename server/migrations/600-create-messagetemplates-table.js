@@ -17,11 +17,11 @@ exports.up = pgm => {
           comment:'Тема сообщения'
         },
         sensorId:{
-            type:'bigint',
+            type:'bigint[]',
             comment:'Номер датчика'
         },
         userId:{
-            type:'bigint',
+            type:'bigint[]',
             comment:'Номер человека, которому нужно отправить'
         },
         isSms:{
