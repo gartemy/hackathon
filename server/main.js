@@ -207,6 +207,38 @@ fastify.get('/request',async (request, reply)=>{
     reply.send(data);
 })
 
+fastify.post('/users/create', async function (request, reply) {
+    let data = {
+        message:   'error',
+        statusCode:400
+    }
+    const client = await pool.connect()
+    try {
+        const result = await client.query( `insert into "users" ("userFio","userEmail","userNum") values ($1,$2,$3) returning "userId"`, 
+                                            [request.body.userFio, request.body.userEmail, request.body.userNum] )
+
+        if(result.rowCount > 0 && result.rows.length > 0){
+            console.log(`Успешно добавили запись`)
+            data.message = result.rows[0]
+            data.statusCode = 200
+        }
+        else{
+            console.log(`Ошибка при добавлении записи`)
+        }
+        console.log(result)
+    }
+    catch ( e ) {
+        console.log( e )
+        data.message = 'Ошибка при выполнении запроса' + e.message
+    }
+    finally {
+        client.release()
+        console.log( 'client release()');
+    }
+    reply.send(data)
+})
+
+
 // Создание запроса с использование path параметров
 fastify.get('/:id',function (request, reply) {
     console.log(`Path параметры, переданные в запросе: `,JSON.stringify(request.params))
