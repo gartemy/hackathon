@@ -124,6 +124,17 @@ fastify.post('/template/show', async (request, reply) => {
     try {
         const templates = await client.query(`SELECT *
                                               FROM messagetemplates`);
+        let fios = [];
+        for (const template of templates.rows) {
+            if(template.userId && template.userId.length === 0){
+                continue
+            }
+            const fio = await client.query(`select array_agg("userFio") as "userFio"
+                                            from users
+                                            where "userId" = any ($1)`, [template.userId])
+            console.log(fio.rows)
+            template.userFio = fio.rows[0].userFio ? fio.rows[0].userFio : ["Не указано"]
+        }
         data.message = templates.rows;
         data.statusCode = 200;
     }
@@ -172,7 +183,7 @@ fastify.get('/request',async (request, reply)=>{
                                                      INNER JOIN messagetemplates m ON r."sensorId" = ANY (m."sensorId")
                                                      INNER JOIN users u ON u."userId" = ANY (m."userId")
                                             WHERE "isGotten" IS FALSE
-                                              AND (r.value < st."minValue" OR r.value > st."maxValue")`);
+                                              AND (r.value < st."minValue" OR r.value > st."maxValue") order by "requestId" limit 10`);
         
         if(request.rows.length === 0){
             data.message = 'Отправлять нечего'

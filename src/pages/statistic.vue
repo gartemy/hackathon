@@ -7,6 +7,7 @@
       row-key="name"
       :hide-bottom="data.length > 0"
       :rows-per-page-options="[0]"
+      wrap-cells
       >
 	      <template v-slot:body-cell-isSms="props">
 		      <q-td :props="props">
