@@ -151,30 +151,32 @@ export default {
       this.message.sensors = null
     },
     async addMessage() {
-	  const request = {
-		  ...this.message,
-	  };
-	  try {
-		  const response = await this.$axios.post('/');
-		  this.data.push({
-			  ...this.message,
-			  userId: response.data.message.userId,
-		  });
-		  this.isVisibl = false;
-		  this.closeMessageDialog();
-	  }
-	  catch(error) {
-		  console.error('ERROR ADD USER');
-	  }
+      const request = {
+        ...this.message,
+      };
+      try {
+        const response = await this.$axios.post('/template/show');
+        this.data.push({
+          ...this.message,
+          userId: response.data.message.userId,
+        });
+        this.isVisibl = false;
+        console.log(response.data.message);
+        this.closeMessageDialog();
+      }
+      catch(error) {
+        console.error('ERROR ADD USER');
+      }
     },
     async getUsers() {
-		try {
-			const response = await this.$axios.post('/')
-			this.data = response.data.message;
-		}
-		catch(error) {
-			console.error('ERROR GET USERS');
-		}
+      try {
+        const response = await this.$axios.get('/users/show')
+        this.data = response.data.message;
+        console.log(response.data.message);
+      }
+      catch(error) {
+        console.error('ERROR GET USERS');
+      }
     },
   },
   async created() {

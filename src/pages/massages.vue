@@ -1,11 +1,11 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-lg">
 
     <q-btn
 	    color="orange"
 	    text-color="black"
 	    label="Добавить сообщение"
-	    class="q-my-md"
+	    class="q-mb-lg bg-accent"
 	    @click="isVisibl = !isVisibl"
     />
 
