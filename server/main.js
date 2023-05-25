@@ -169,6 +169,37 @@ fastify.get('/users/show', async (request, reply) => {
     reply.send(data);
 });
 
+fastify.get('/messages/show', async (request, reply) => {
+    let data = {
+        message:    'error',
+        statusCode: 400,
+    };
+    const client = await pool.connect();
+    try {
+        const request = await client.query(`SELECT *
+                                            FROM messages`);
+        for (const template of request.rows) {
+            if(template.userId && template.userId.length === 0){
+                continue
+            }
+            const fio = await client.query(`select array_agg("userFio") as "userFio"
+                                            from users
+                                            where "userId" = any ($1)`, [template.userId])
+            console.log(fio.rows)
+            template.userFio = fio.rows[0].userFio ? fio.rows[0].userFio : ["Не указано"]
+        }
+        data.message = request.rows;
+        data.statusCode = 200;
+    }
+    catch (e) {
+        console.log(e);
+    }
+    finally {
+        client.release();
+    }
+    reply.send(data);
+});
+
 fastify.get('/request',async (request, reply)=>{
     let data = {
         message:    'error',
@@ -199,8 +230,8 @@ fastify.get('/request',async (request, reply)=>{
                                     AND (r.value < st."minValue" OR r.value > st."maxValue")) AS r
                             WHERE r."requestId" = requests."requestId"`);
         
-        await client.query(`INSERT INTO messages ("workshopId", "lineId", "sensorId", "messageText", "messageTitle", "isSms", "isEmail")
-                            SELECT r."workshopId", r."lineId", r."sensorId", m."messageText", m."messageTitle", m."isSms", m."isEmail"
+        await client.query(`INSERT INTO messages ("workshopId", "lineId", "sensorId", "messageText", "messageTitle", "isSms", "isEmail","userId")
+                            SELECT r."workshopId", r."lineId", r."sensorId", m."messageText", m."messageTitle", m."isSms", m."isEmail",m."userId"
                             FROM requests r
                                      INNER JOIN sensors s ON s."sensorId" = r."sensorId"
                                      INNER JOIN sensortype st ON s."sensorType" = st."sensorTypeId"
@@ -225,8 +256,8 @@ fastify.post('/users/create', async function (request, reply) {
     }
     const client = await pool.connect()
     try {
-        const result = await client.query( `insert into "users" ("userFio","userEmail","userNum") values ($1,$2,$3) returning "userId"`, 
-                                            [request.body.userFio, request.body.userEmail, request.body.userNum] )
+        const result = await client.query( `insert into "users" ("userFio","userEmail","userPhone") values ($1,$2,$3) returning "userId"`,
+                                            [request.body.userFio, request.body.userEmail, request.body.userPhone] )
 
         if(result.rowCount > 0 && result.rows.length > 0){
             console.log(`Успешно добавили запись`)

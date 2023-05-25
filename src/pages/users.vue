@@ -55,8 +55,10 @@
           />
 	        
           <q-input
-	          v-model="message.userNum"
+	          v-model="message.userPhone"
 	          label="Номер телефона"
+	          mask="+7 (###) ###-##-##"
+	          fill-mask
 	          class="q-mb-lg"
           />
 	        
@@ -80,7 +82,7 @@ export default {
     return {
       isVisiblUser: false,
       options: [
-        '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'
+        '1', '2', '3', '4', '5',
       ],
       columns: [
         {
@@ -97,13 +99,13 @@ export default {
           align: 'center',
           field: 'userFio',
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
-	      style: 'font-size: 1rem;'
+	      style: 'font-size: 1rem;',
         },
         {
-          name: 'userNum',
+          name: 'userPhone',
           label: 'Номер телефона',
           align: 'center',
-          field: 'userNum',
+          field: 'userPhone',
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
 	      style: 'font-size: 1rem;'
         },
@@ -119,7 +121,7 @@ export default {
       data: [],
       message: {
         userFio: null,
-        userNum: null,
+        userPhone: null,
         userEmail: null,
       },
     }
@@ -127,7 +129,7 @@ export default {
   methods: {
     closeUserDialog() {
       this.message.userFio = null
-      this.message.userNum = null
+      this.message.userPhone = null
       this.message.userEmail = null
     },
     async addUser() {
