@@ -172,7 +172,7 @@ fastify.get('/request',async (request, reply)=>{
                                                      INNER JOIN messagetemplates m ON r."sensorId" = ANY (m."sensorId")
                                                      INNER JOIN users u ON u."userId" = ANY (m."userId")
                                             WHERE "isGotten" IS FALSE
-                                              AND (r.value < st."minValue" OR r.value > st."maxValue")`);
+                                              AND (r.value < st."minValue" OR r.value > st."maxValue") order by "requestId" limit 10`);
         
         if(request.rows.length === 0){
             data.message = 'Отправлять нечего'
