@@ -1,6 +1,11 @@
 <template>
-  <q-page class="q-pa-md">
-    <q-btn color="orange" text-color="black" label="Добавить пользователя" class="q-ma-md" @click="isVisiblUser = !isVisiblUser"/>
+  <q-page class="q-pa-lg">
+    <q-btn
+	    text-color="black"
+	    label="Добавить пользователя"
+	    class="q-mb-lg bg-accent"
+	    @click="isVisiblUser = !isVisiblUser"
+    />
 
     <q-table
       title="Пользователи"
@@ -8,8 +13,15 @@
       :columns="columns"
       row-key="name"
       :hide-bottom="data.length > 0"
+      no-data-label="Данные о пользователях не найдены"
       :rows-per-page-options="[0]"
-    />  
+    >
+	    <template v-slot:body-cell-number="props">
+		    <q-td :props="props">
+			    {{ props.rowIndex + 1 }}
+		    </q-td>
+	    </template>
+    </q-table>
 
     <q-dialog v-model="isVisiblUser">
       <q-card style="width: 500px; max-width: 90vw;" class="bg-white">
@@ -19,30 +31,50 @@
           <div class="col-auto">
             <q-btn
               v-close-popup
-              icon="close"
+              icon="fas fa-times"
               color="dark"
               flat
+              dense
+              round
             />
           </div>
-          
         </q-card-section>
 
         <q-separator />
 
         <q-card-section>
-          <q-input v-model="message.name" placeholder="ФИО"/>
-          <q-input v-model="message.email_telephone" placeholder="Email/телефон"/>
-          <div style="display: flex" class="q-ma-md">
-            <q-select
-            filled
-            multiple
-            :options="options"
-            label="Датчики"
-            style="width: 250px"
+          <q-input
+	          v-model="message.name"
+	          label="ФИО пользователя"
+	          class="q-mb-md"
+          />
+          <q-input
+	          v-model="message.email"
+	          label="Email пользователя"
+	          class="q-mb-md"
+          />
+	        
+          <q-input
+	          v-model="message.telephoneNumber"
+	          label="Номер телефона"
+	          class="q-mb-md"
+          />
+	        
+          <q-select
             v-model="message.sensors"
-            /> 
-            <q-btn color="orange" text-color="black" label="Добавить" class="q-ml-md"/>
-          </div>
+            :options="options"
+            multiple
+            label="Датчики"
+            class="q-mb-lg"
+          />
+	        
+          <q-btn
+	          color="orange"
+	          text-color="black"
+	          label="Добавить пользователя"
+	          class="full-width"
+	          @click="addMessage()"
+          />
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -55,11 +87,6 @@ export default {
   data() {
     return {
       isVisiblUser: false,
-      message: {
-        name: null,
-        email_telephone: null,
-        sensors: null,
-      },
       options: [
         '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'
       ],
@@ -67,60 +94,54 @@ export default {
         {
           name: 'number',
           label: 'Номер',
-          align: 'left',
+          align: 'center',
           field: 'number',
-          style: 'width: 1%',
+          headerStyle: 'font-size: 1rem; font-weight: 700;',
+          style: 'font-size: 1rem;'
         },
         {
-          name: 'subject',
+          name: 'name',
           required: true,
-          label: 'Фио',
-          align: 'left',
-          field: 'subject',
-          style: 'width: 30%',
+          label: 'ФИО пользователя',
+          align: 'center',
+          field: 'name',
+	      headerStyle: 'font-size: 1rem; font-weight: 700;',
+	      style: 'font-size: 1rem;'
         },
         {
-          name: 'body',
+          name: 'telephoneNumber',
           required: true,
           label: 'Номер телефона',
-          align: 'left',
-          field: 'body',
-          style: 'width: 40%',
+          align: 'center',
+          field: 'telephoneNumber',
+	      headerStyle: 'font-size: 1rem; font-weight: 700;',
+	      style: 'font-size: 1rem;'
         },
         {
-          name: 'sensors',
+          name: 'email',
           required: true,
           label: 'Email',
-          align: 'left',
-          field: 'sensors',
-        }
+          align: 'center',
+          field: 'email',
+	      headerStyle: 'font-size: 1rem; font-weight: 700;',
+	      style: 'font-size: 1rem;'
+        },
+        {
+          name: "sensors",
+          label: "Датчики",
+          align: "center",
+          field: "sensors",
+	      headerStyle: 'font-size: 1rem; font-weight: 700;',
+	      style: 'font-size: 1rem;'
+        },
       ],
-      data: [
-        {
-          number: 1,
-          subject: "wdf", 
-          body: "шапгыр",
-          sensors: "sensors"
-        },
-        {
-          number: 2,
-          subject: "wdf", 
-          body: "шапгыр",
-          sensors: "sensors"
-        },
-        {
-          number: 3,
-          subject: "wdf", 
-          body: "шапгыр",
-          sensors: "sensors"
-        },
-        {
-          number: 4,
-          subject: "wdf", 
-          body: "шапгыр",
-          sensors: "sensors"
-        },
-      ]
+      data: [],
+      message: {
+        name: null,
+        telephoneNumber: null,
+        email: null,
+        sensors: null
+      },
     }
   },
   methods: {
@@ -129,14 +150,35 @@ export default {
       this.message.body = null
       this.message.sensors = null
     },
-    addMessage() {
-      this.data.push({
-        number: this.data.length + 1,
-        ...this.message,
-      })
-      this.isVisibl = false
-      this.closeMessageDialog()
-    }
-  }
+    async addMessage() {
+	  const request = {
+		  ...this.message,
+	  };
+	  try {
+		  const response = await this.$axios.post('/');
+		  this.data.push({
+			  ...this.message,
+			  userId: response.data.message.userId,
+		  });
+		  this.isVisibl = false;
+		  this.closeMessageDialog();
+	  }
+	  catch(error) {
+		  console.error('ERROR ADD USER');
+	  }
+    },
+    async getUsers() {
+		try {
+			const response = await this.$axios.post('/')
+			this.data = response.data.message;
+		}
+		catch(error) {
+			console.error('ERROR GET USERS');
+		}
+    },
+  },
+  async created() {
+	  await this.getUsers();
+  },
 }
 </script>

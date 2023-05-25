@@ -4,14 +4,26 @@
 
 .header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     padding: 10px;
 }
 .head {
-    width: 90%;
+    width: 100%;
 }
 
 a {
     text-decoration: none;
     color: $dark;
+}
+
+.q-field--standard .q-field__control:after {
+    background: orange;
+}
+
+.q-field--highlighted .q-field__label {
+    color: orange;
+}
+
+.q-layout__section--marginal {
+    background-color: #ffffff;
 }
