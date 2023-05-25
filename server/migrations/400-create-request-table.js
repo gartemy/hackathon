@@ -16,13 +16,39 @@ exports.up = pgm => {
             type:'bigint',
             comment:'Номер линии, с которой пришло уведомление'
         },
-        requestPriority:{
-            type:'int',
-            comment:'Приоритет заявки\n1 - просто уведомление\n2 - предупреждение\n3 - фатальная ошибка'
+        sensorId:{
+            type:'bigint',
+            comment:'Номер сенсора, с котороого пришло уведомление'
         },
-        requestSensors:{
-            type:'jsonb',
-            comment:'Объект с информацией по датчикам'
+        value:{
+            type:'integer',
+            comment:'Значение датчика'
+        },
+        isDone: {
+          type: 'boolean',
+          comment: 'Обработана ли заявка',
+          default: false
+        },
+        sensorType: {
+          type:'integer',
+          comment: 'тип датчика 1-температура 2-давление 3-напряжение'
+        },
+        isGotten:{
+          type: 'boolean',
+          comment: 'взята ли заявка',
+          default: false
+        },
+        isDelay:{
+          type: 'boolean',
+          comment: 'просроченна ли заявка',
+          default: false
+        },
+        createDate: {
+          type: 'timestamp with time zone',
+          default: pgm.func('now()')
+        },
+        getDate:{
+          type: 'timestamp with time zone'
         }
     }, {
         ifNotExists: true,

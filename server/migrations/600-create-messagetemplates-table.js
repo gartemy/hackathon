@@ -24,10 +24,14 @@ exports.up = pgm => {
             type:'bigint',
             comment:'Номер человека, которому нужно отправить'
         },
-        messageType:{
-            type:'int',
-            comment:'Куда отправили\n1 - почта\n2 - смс\n3 - телега'
-        }
+        isSms:{
+          type: 'boolean',
+          comment: 'Отправлено по sms'
+        },
+        isEmail:{
+          type: 'boolean',
+          comment: 'Отправлено на email'
+        },
     }, {
         ifNotExists: true,
         comment:'Шаблоны сообщений, из конструктора'

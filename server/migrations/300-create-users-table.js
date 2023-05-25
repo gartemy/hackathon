@@ -12,6 +12,14 @@ exports.up = pgm => {
             type:'varchar(500)',
             comment:'Фио сотрудника'
         },
+        userEmail:{
+          type: 'varchar(500)',
+          comment: 'Email пользователя'
+        },
+        userRole:{
+          type: "integer",
+          comment: '1 - админ, 2-пользователь'
+        }
     }, {
         ifNotExists: true,
         comment:'Сотрудники'

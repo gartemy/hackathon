@@ -28,10 +28,16 @@ exports.up = pgm => {
             type:'varchar(500)',
             comment:'Тема сообщения'
         },
-        messageType:{
-            type:'int',
-            comment:'Куда отправили\n1 - почта\n2 - смс\n3 - телега'
-        }
+        isSms:{
+            type: 'boolean',
+            comment: 'Отправлено по sms'
+        },
+        isEmail:{
+            type: 'boolean',
+            comment: 'Отправлено на email'
+        },
+
+
     }, {
         ifNotExists: true,
         comment:'Сотрудники'

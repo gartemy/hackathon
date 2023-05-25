@@ -1,5 +1,6 @@
 require( 'dotenv' ).config();
 const { pool } = require( './postgresql' )
+const { create } = require('axios');
 const fastify = require( 'fastify' )( {
     logger:true,
 } );
@@ -43,64 +44,99 @@ fastify.get( '/', async function (request, reply) {
     reply.send( data )
 } )
 
-// Создание маршрута для post запроса
-fastify.post('/post',async function (request, reply) {
+fastify.post('/request/add', async (request, reply) => {
     let data = {
-        message:   'error',
+        message:'error',
         statusCode:400
     }
     const client = await pool.connect()
     try {
-        const result = await client.query( `insert into "таблица" ("значение1","значение2") values ($1,$2) returning id`, [ 'параметр1, параметр2' ] )
-
-        if(result.rowCount > 0){
-            console.log(`Успешно добавили запись`)
-            data.message = {
-                id:result.rows[0].id
-            }
+        const object = request.body
+        
+        const createRequest = await client.query(`INSERT INTO requests ("workshopId", "lineId", "sensorId", value, "sensorType")
+                                                  VALUES ($1, $2, $3, $4, $5)`, [
+            object.workshopId, object.lineId, object.sensorId, object.value, object.sensorType,
+        ]);
+        if(createRequest.rowCount > 0){
+            console.log(`Запрос успешно добавился`);
         }
         else{
-            console.log(`Ошибка при добавлении записи`)
+            console.log(`Ошибка при добавлении запроса`);
         }
     }
-    catch ( e ) {
-        console.log( e )
-        data.message = 'Ошибка при выполнении запроса' + e.message
+    catch (e) {
+        console.log(e);
     }
     finally {
         client.release()
     }
-    reply.send( data )
-})
+    reply.send(data)
+});
 
-fastify.post('/update',async function (request, reply) {
+fastify.post('/template/add', async (request, reply) => {
     let data = {
-        message:   'error',
+        message:'error',
         statusCode:400
     }
     const client = await pool.connect()
     try {
-        const result = await client.query( `update "таблица" set "значение1" = $1,"значение2" = $2`, [ 'параметр1, параметр2' ] )
-
-        if(result.rowCount > 0){
-            console.log(`Успешно обновили запись`)
+        const object = request.body
+        
+        const createTemplate = await client.query(`INSERT INTO messagetemplates ("messageText", "messageTitle", "sensorId", "userId", "isSms", "isEmail")
+                                                   VALUES ($1, $2, $3, $4, $5, $6) RETURNING "messageTemplateId"::integer`,
+            [
+                object.messageText,
+                object.messageTitle,
+                object.sensorId,
+                object.userId,
+                object.isSms,
+                object.isEmail,
+            ]
+        );
+        
+        if(createTemplate.rowCount > 0 && createTemplate.rows.length > 0){
+            console.log(`Создали шаблон`);
+            
             data.message = {
-                id:result.rows[0].id
+                messageTemplateId:createTemplate.rows[0].messageTemplateId
             }
+            data.statusCode = 200
         }
         else{
-            console.log(`Ошибка при обновлении записи`)
+            console.log(`Ошибка при создании шаблона`);
         }
     }
-    catch ( e ) {
-        console.log( e )
-        data.message = 'Ошибка при выполнении запроса' + e.message
+    catch (e) {
+        console.log(e);
     }
     finally {
         client.release()
     }
-    reply.send( data )
-})
+    reply.send(data)
+});
+
+fastify.post('/template/show', async (request, reply) => {
+    let data = {
+        message:    'error',
+        statusCode: 400,
+    };
+    const client = await pool.connect();
+    try {
+        const templates = await client.query(`SELECT *
+                                              FROM messagetemplates`);
+        data.message = templates.rows;
+        data.statusCode = 200;
+    }
+    catch (e) {
+        console.log(e);
+    }
+    finally {
+        client.release();
+    }
+    reply.send(data);
+});
+
+
 
 // Создание запроса с использование path параметров
 fastify.get('/:id',function (request, reply) {

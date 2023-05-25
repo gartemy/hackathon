@@ -5,7 +5,7 @@ exports.shorthands = undefined;
 exports.up = pgm => {
     pgm.createTable('lines', {
         lineId:           {
-            type:       'bigserial',
+            type:       'bigint',
             primaryKey: true,
         },
         workshopId:         {

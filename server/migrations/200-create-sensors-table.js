@@ -5,17 +5,17 @@ exports.shorthands = undefined;
 exports.up = pgm => {
     pgm.createTable('sensors', {
         sensorId:           {
-            type:       'bigserial',
+            type:       'bigint',
             primaryKey: true,
         },
         lineId:{
             type:'bigint',
             comment:'Номер линии, к которой привязан датчик'
         },
-        sensorValue:         {
-            type: 'numeric(30,2)',
-            comment:'Эталонное значение датчика'
-        },
+        sensorType:{
+          type: 'integer',
+          comment: 'тип датчика 1-температура 2-давление 3-напряжение'
+        }
     }, {
         ifNotExists: true,
         comment:'Датчики'
