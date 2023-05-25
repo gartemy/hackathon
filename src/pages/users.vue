@@ -15,6 +15,7 @@
       :hide-bottom="data.length > 0"
       no-data-label="Данные о пользователях не найдены"
       :rows-per-page-options="[0]"
+      wrap-cells
     >
 	    <template v-slot:body-cell-number="props">
 		    <q-td :props="props">
@@ -57,15 +58,7 @@
           <q-input
 	          v-model="message.telephoneNumber"
 	          label="Номер телефона"
-	          class="q-mb-md"
-          />
-	        
-          <q-select
-            v-model="message.sensors"
-            :options="options"
-            multiple
-            label="Датчики"
-            class="q-mb-lg"
+	          class="q-mb-lg"
           />
 	        
           <q-btn
@@ -123,14 +116,6 @@ export default {
           label: 'Email',
           align: 'center',
           field: 'email',
-	      headerStyle: 'font-size: 1rem; font-weight: 700;',
-	      style: 'font-size: 1rem;'
-        },
-        {
-          name: "sensors",
-          label: "Датчики",
-          align: "center",
-          field: "sensors",
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
 	      style: 'font-size: 1rem;'
         },

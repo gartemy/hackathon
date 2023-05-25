@@ -17,6 +17,7 @@
       no-data-label="Шаблоны сообщений не найдены"
       :hide-bottom="data.length > 0"
       :rows-per-page-options="[0]"
+      wrap-cells
     >
 	    <template v-slot:body-cell-number="props">
 		    <q-td :props="props">
@@ -47,6 +48,7 @@
 
     <q-dialog
 	    v-model="isVisibl"
+	    @before-show="getUsersForSelect"
 	    @before-hide="closeMessageDialog"
     >
       <q-card style="width: 500px; max-width: 90vw;" class="bg-white">
@@ -80,6 +82,26 @@
 	          autogrow
 	          class="q-mb-md"
           />
+	        
+	      <q-select
+		      v-model="message.userId"
+		      :options="users"
+		      option-value="userId"
+		      option-label="userFio"
+		      multiple
+		      label="Пользователи"
+		      class="q-mb-md"
+	      >
+		      <template v-slot:no-option>
+			      <q-item>
+				      <q-item-section>
+					      <q-item-label class="text-grey-5">
+						      Пользователи не найдены
+					      </q-item-label>
+				      </q-item-section>
+			      </q-item>
+		      </template>
+	      </q-select>
 	        
 	       <q-select
 		       v-model="message.sensorId"
@@ -127,13 +149,15 @@ export default {
       message: {
         messageTitle: null,
         messageText:  null,
-        sensorId:      null,
+        sensorId:     null,
+	    userId:       null,
         isSms:        false,
         isEmail:      false,
       },
       options: [
-        '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'
+        '1', '2', '3', '4', '5'
       ],
+      users: [],
       isVisibl: false,
       columns: [
           {
@@ -170,6 +194,15 @@ export default {
             format: value => value ? this.generateSensorsList(value) : '',
           },
 	      {
+		      name: 'userFio',
+		      label: 'Пользователи',
+		      align: 'center',
+		      field: 'userFio',
+		      style: 'font-size: 1rem; font-weight: 700px;',
+		      headerStyle: 'font-size: 1rem; font-weight: 700px;',
+		      format: value => value ? this.generateUsersList(value) : '',
+	      },
+	      {
 		      name: 'isSms',
 		      label: 'Отправка SMS',
 		      align: 'center',
@@ -201,6 +234,7 @@ export default {
 	  const request = {
 		  ...this.message,
 	  };
+	  request.userId = this.message.userId.map((user) => user.userId);
 	  try {
 		  const response = await this.$axios.post('/template/add', request);
 		  this.data.push({
@@ -216,16 +250,27 @@ export default {
     },
 	generateSensorsList(sensors) {
 		let sensorsList = '';
-		sensors.map((sensor, index) => {
-			if (index !== sensors.length - 1) {
-				sensorsList += `№${sensor}; `;
+		for (let i = 0; i < sensors.length; i++) {
+			if (i === sensors.length - 1) {
+				sensorsList += `№${sensors[i]} `;
 			}
 			else {
-				sensorsList += `№${sensor}`;
+				sensorsList += `№${sensors[i]}; `;
 			}
-		});
-		
+		}
 		return sensorsList;
+	},
+	generateUsersList(users) {
+		let usersList = '';
+		for (let i = 0; i < users.length; i++) {
+			if (i === users.length - 1) {
+				usersList += `${users[i]} `;
+			}
+			else {
+				usersList += `${users[i]}; `;
+			}
+		}
+		return usersList;
 	},
     async getMessages() {
 		try {
@@ -235,7 +280,16 @@ export default {
 		catch(error) {
 			console.error('ERROR GET MESSAGES');
 		}
-    }
+    },
+    async getUsersForSelect() {
+		try {
+			const response = await this.$axios.get('/users/show');
+			this.users = response.data.message;
+		}
+		catch(error) {
+			console.error('ERROR GET USERS');
+		}
+    },
   },
   async created() {
 	  await this.getMessages();
