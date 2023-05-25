@@ -151,6 +151,7 @@ export default {
       try {
         const response = await this.$axios.get('/users/show')
         this.data = response.data.message;
+        console.log(response.data.message);
       }
       catch(error) {
         console.error('ERROR GET USERS');
