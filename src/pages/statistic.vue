@@ -2,12 +2,20 @@
     <q-page class="q-pa-lg">
       <q-table
       title="Статистика"
+      :loading="isLoadingStatistic"
       :data="data"
       :columns="columns"
-      row-key="name"
       :hide-bottom="data.length > 0"
       :rows-per-page-options="[0]"
+      no-data-label="Нет данных об отправленных сообщениях"
+      wrap-cells
       >
+	      <template v-slot:loading>
+		      <q-inner-loading
+		        color="orange"
+		        showing
+		      />
+	      </template>
 	      <template v-slot:body-cell-isSms="props">
 		      <q-td :props="props">
 			      <q-icon
@@ -35,43 +43,69 @@
   export default {
     name: 'PageStatistic',
     methods: {
-
+		async getStatistic() {
+			try {
+				this.isLoadingStatistic = true;
+				const response = await this.$axios.get('/messages/show');
+				this.data = response.data.message;
+			}
+			catch(error) {
+				console.error('ERROR GET STATISTIC');
+			}
+			finally {
+				this.isLoadingStatistic = false;
+			}
+		},
+	    generateUserFio(userFio) {
+		    let usersList = '';
+		    for (let i = 0; i < userFio.length; i++) {
+			    if (i === userFio.length - 1) {
+				    usersList += `${ userFio[i] } `;
+			    }
+			    else {
+				    usersList += `${ userFio[i] }; `;
+			    }
+		    }
+		    return usersList;
+	    },
     },
-    created: {
-      
+    async created() {
+      await this.getStatistic();
     },
     data() {
       return {
         columns: [
           {
-            name: 'date',
+            name: 'messageDate',
             label: 'Дата отправки',
             align: 'center',
-            field: 'date',
+            field: 'messageDate',
 	        style: 'font-size: 1rem; font-weight: 700px;',
-	        headerStyle: 'font-size: 1rem; font-weight: 700px;'
+	        headerStyle: 'font-size: 1rem; font-weight: 700px;',
+            format: value => value ? new Date(value).toLocaleString() : 'Не указана',
           },
           {
-            name: 'mans',
-            label: 'Пользователи',
+            name: 'userFio',
+            label: 'Кому отправлено',
 	        align: 'center',
-            field: 'mans',
+            field: 'userFio',
 	        style: 'font-size: 1rem; font-weight: 700px;',
-	        headerStyle: 'font-size: 1rem; font-weight: 700px;'
+	        headerStyle: 'font-size: 1rem; font-weight: 700px;',
+	        format: value => this.generateUserFio(value),
           },
           {
-            name: 'team',
+            name: 'messageTitle',
             label: 'Тема сообщения',
 	        align: 'center',
-            field: 'team',
+            field: 'messageTitle',
 	        style: 'font-size: 1rem; font-weight: 700px;',
 	        headerStyle: 'font-size: 1rem; font-weight: 700px;'
           },
           {
-            name: 'messages',
+            name: 'messageText',
             label: 'Сообщение',
 	        align: 'center',
-            field: 'messages',
+            field: 'messageText',
 	        style: 'font-size: 1rem; font-weight: 700px;',
 	        headerStyle: 'font-size: 1rem; font-weight: 700px;'
           },
@@ -92,16 +126,8 @@
 	        headerStyle: 'font-size: 1rem; font-weight: 700px;'
           }
         ],
-        data: [
-          {
-            date: '25.05.23',
-            mans: "Баталин Дмитрий Андреевич", 
-            team: "Поломка",
-            messages: "Сломалось все, переделывай ",
-            email: "email@vk.com",
-            telephoneNumber: "89222222222",
-          },
-        ]
+        data: [],
+        isLoadingStatistic: false,
       }
     }
   }

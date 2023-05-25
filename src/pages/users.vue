@@ -11,10 +11,10 @@
       title="Пользователи"
       :data="data"
       :columns="columns"
-      row-key="name"
       :hide-bottom="data.length > 0"
       no-data-label="Данные о пользователях не найдены"
       :rows-per-page-options="[0]"
+      wrap-cells
     >
 	    <template v-slot:body-cell-number="props">
 		    <q-td :props="props">
@@ -23,7 +23,7 @@
 	    </template>
     </q-table>
 
-    <q-dialog v-model="isVisiblUser">
+    <q-dialog v-model="isVisiblUser" @before-hide="closeUserDialog">
       <q-card style="width: 500px; max-width: 90vw;" class="bg-white">
         <q-card-section class="row items-center">
           <div class="col text-h5">Добавление пользователя</div> 
@@ -44,28 +44,22 @@
 
         <q-card-section>
           <q-input
-	          v-model="message.name"
+	          v-model="message.userFio"
 	          label="ФИО пользователя"
 	          class="q-mb-md"
           />
           <q-input
-	          v-model="message.email"
+	          v-model="message.userEmail"
 	          label="Email пользователя"
 	          class="q-mb-md"
           />
 	        
           <q-input
-	          v-model="message.telephoneNumber"
+	          v-model="message.userPhone"
 	          label="Номер телефона"
-	          class="q-mb-md"
-          />
-	        
-          <q-select
-            v-model="message.sensors"
-            :options="options"
-            multiple
-            label="Датчики"
-            class="q-mb-lg"
+	          mask="+7 (###) ###-##-##"
+	          fill-mask
+	          class="q-mb-lg"
           />
 	        
           <q-btn
@@ -73,7 +67,7 @@
 	          text-color="black"
 	          label="Добавить пользователя"
 	          class="full-width"
-	          @click="addMessage()"
+	          @click="addUser"
           />
         </q-card-section>
       </q-card>
@@ -88,7 +82,7 @@ export default {
     return {
       isVisiblUser: false,
       options: [
-        '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'
+        '1', '2', '3', '4', '5',
       ],
       columns: [
         {
@@ -100,81 +94,70 @@ export default {
           style: 'font-size: 1rem;'
         },
         {
-          name: 'name',
-          required: true,
+          name: 'userFio',
           label: 'ФИО пользователя',
           align: 'center',
-          field: 'name',
+          field: 'userFio',
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
-	      style: 'font-size: 1rem;'
+	      style: 'font-size: 1rem;',
         },
         {
-          name: 'telephoneNumber',
-          required: true,
+          name: 'userPhone',
           label: 'Номер телефона',
           align: 'center',
-          field: 'telephoneNumber',
+          field: 'userPhone',
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
 	      style: 'font-size: 1rem;'
         },
         {
-          name: 'email',
-          required: true,
+          name: 'userEmail',
           label: 'Email',
           align: 'center',
-          field: 'email',
-	      headerStyle: 'font-size: 1rem; font-weight: 700;',
-	      style: 'font-size: 1rem;'
-        },
-        {
-          name: "sensors",
-          label: "Датчики",
-          align: "center",
-          field: "sensors",
+          field: 'userEmail',
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
 	      style: 'font-size: 1rem;'
         },
       ],
       data: [],
       message: {
-        name: null,
-        telephoneNumber: null,
-        email: null,
-        sensors: null
+        userFio: null,
+        userPhone: null,
+        userEmail: null,
       },
     }
   },
   methods: {
-    closeMessageDialog() {
-      this.message.subject = null
-      this.message.body = null
-      this.message.sensors = null
+    closeUserDialog() {
+      this.message.userFio = null
+      this.message.userPhone = null
+      this.message.userEmail = null
     },
-    async addMessage() {
-	  const request = {
-		  ...this.message,
-	  };
-	  try {
-		  const response = await this.$axios.post('/');
-		  this.data.push({
-			  ...this.message,
-			  userId: response.data.message.userId,
-		  });
-		  this.isVisibl = false;
-		  this.closeMessageDialog();
-	  }
-	  catch(error) {
-		  console.error('ERROR ADD USER');
-	  }
+    async addUser() {
+      const request = {
+        ...this.message,
+      };
+      try {
+        const response = await this.$axios.post('/users/create', request);
+        this.data.push({
+          ...this.message,
+          userId: response.data.message.userId,
+        });
+        this.isVisiblUser = false;
+        this.closeUserDialog();
+      }
+      catch(error) {
+        console.error('ERROR ADD USER');
+      }
     },
     async getUsers() {
-		try {
-			const response = await this.$axios.post('/')
-			this.data = response.data.message;
-		}
-		catch(error) {
-			console.error('ERROR GET USERS');
-		}
+      try {
+        const response = await this.$axios.get('/users/show')
+        this.data = response.data.message;
+        console.log(response.data.message);
+      }
+      catch(error) {
+        console.error('ERROR GET USERS');
+      }
     },
   },
   async created() {
