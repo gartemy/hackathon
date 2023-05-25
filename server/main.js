@@ -187,6 +187,14 @@ fastify.get('/request',async (request, reply)=>{
                                   WHERE "isGotten" IS FALSE
                                     AND (r.value < st."minValue" OR r.value > st."maxValue")) AS r
                             WHERE r."requestId" = requests."requestId"`);
+        
+        await client.query(`INSERT INTO messages ("workshopId", "lineId", "sensorId", "messageText", "messageTitle", "isSms", "isEmail")
+                            SELECT r."workshopId", r."lineId", r."sensorId", m."messageText", m."messageTitle", m."isSms", m."isEmail"
+                            FROM requests r
+                                     INNER JOIN sensors s ON s."sensorId" = r."sensorId"
+                                     INNER JOIN sensortype st ON s."sensorType" = st."sensorTypeId"
+                                     INNER JOIN messagetemplates m ON r."sensorId" = ANY (m."sensorId")
+                            WHERE "isGotten" IS FALSE`);
         data.message = request.rows;
         data.statusCode = 200;
     }

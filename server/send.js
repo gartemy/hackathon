@@ -36,7 +36,7 @@ async function sendSmsAndMail () {
                 }
                 
                 if (isSms) {
-                    await axios.get('https://sms.ru/sms/send?api_id=' + process.env.SMS_ID + '&to=' + userPhone + '&msg=' + messageTitle + '&json=1&from=evraz');
+                    // await axios.get('https://sms.ru/sms/send?api_id=' + process.env.SMS_ID + '&to=' + userPhone + '&msg=' + messageTitle + '&json=1&from=evraz');
                 }
             }
         }
