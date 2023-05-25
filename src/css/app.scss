@@ -1,0 +1,17 @@
+// app global css in SCSS form
+
+@import 'quasar.variables.scss';
+
+.header {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+.head {
+    width: 90%;
+}
+
+a {
+    text-decoration: none;
+    color: $dark;
+}
