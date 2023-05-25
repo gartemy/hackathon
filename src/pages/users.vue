@@ -11,7 +11,6 @@
       title="Пользователи"
       :data="data"
       :columns="columns"
-      row-key="name"
       :hide-bottom="data.length > 0"
       no-data-label="Данные о пользователях не найдены"
       :rows-per-page-options="[0]"
@@ -24,7 +23,7 @@
 	    </template>
     </q-table>
 
-    <q-dialog v-model="isVisiblUser">
+    <q-dialog v-model="isVisiblUser" @before-hide="closeUserDialog">
       <q-card style="width: 500px; max-width: 90vw;" class="bg-white">
         <q-card-section class="row items-center">
           <div class="col text-h5">Добавление пользователя</div> 
@@ -45,18 +44,18 @@
 
         <q-card-section>
           <q-input
-	          v-model="message.name"
+	          v-model="message.userFio"
 	          label="ФИО пользователя"
 	          class="q-mb-md"
           />
           <q-input
-	          v-model="message.email"
+	          v-model="message.userEmail"
 	          label="Email пользователя"
 	          class="q-mb-md"
           />
 	        
           <q-input
-	          v-model="message.telephoneNumber"
+	          v-model="message.userNum"
 	          label="Номер телефона"
 	          class="q-mb-lg"
           />
@@ -66,7 +65,7 @@
 	          text-color="black"
 	          label="Добавить пользователя"
 	          class="full-width"
-	          @click="addMessage()"
+	          @click="addUser"
           />
         </q-card-section>
       </q-card>
@@ -93,61 +92,56 @@ export default {
           style: 'font-size: 1rem;'
         },
         {
-          name: 'name',
-          required: true,
+          name: 'userFio',
           label: 'ФИО пользователя',
           align: 'center',
-          field: 'name',
+          field: 'userFio',
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
 	      style: 'font-size: 1rem;'
         },
         {
-          name: 'telephoneNumber',
-          required: true,
+          name: 'userNum',
           label: 'Номер телефона',
           align: 'center',
-          field: 'telephoneNumber',
+          field: 'userNum',
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
 	      style: 'font-size: 1rem;'
         },
         {
-          name: 'email',
-          required: true,
+          name: 'userEmail',
           label: 'Email',
           align: 'center',
-          field: 'email',
+          field: 'userEmail',
 	      headerStyle: 'font-size: 1rem; font-weight: 700;',
 	      style: 'font-size: 1rem;'
         },
       ],
       data: [],
       message: {
-        name: null,
-        telephoneNumber: null,
-        email: null,
-        sensors: null
+        userFio: null,
+        userNum: null,
+        userEmail: null,
       },
     }
   },
   methods: {
-    closeMessageDialog() {
-      this.message.subject = null
-      this.message.body = null
-      this.message.sensors = null
+    closeUserDialog() {
+      this.message.userFio = null
+      this.message.userNum = null
+      this.message.userEmail = null
     },
-    async addMessage() {
+    async addUser() {
       const request = {
         ...this.message,
       };
       try {
-        const response = await this.$axios.post('/template/show');
+        const response = await this.$axios.post('/users/create', request);
         this.data.push({
           ...this.message,
           userId: response.data.message.userId,
         });
-        this.isVisibl = false;
-        console.log(response.data.message);
-        this.closeMessageDialog();
+        this.isVisiblUser = false;
+        this.closeUserDialog();
       }
       catch(error) {
         console.error('ERROR ADD USER');
@@ -157,7 +151,6 @@ export default {
       try {
         const response = await this.$axios.get('/users/show')
         this.data = response.data.message;
-        console.log(response.data.message);
       }
       catch(error) {
         console.error('ERROR GET USERS');
